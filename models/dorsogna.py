@@ -1,14 +1,12 @@
+"""
+Majority of the code in this script was imported from https://github.com/tanpei0513/vicsek_trajectory
+Code adjustments were made, particularly on lines 122-130
+"""
 import numpy as np
 import warnings
 warnings.filterwarnings("ignore")
 
 from scipy.integrate import ode
-# from sklearn.decomposition import PCA
-# from sklearn.preprocessing import StandardScaler
-# from sklearn.cluster import SpectralClustering
-
-# from utils import accu_type_score
-
 
 class Particle:
     type_num = 0
@@ -78,8 +76,6 @@ class DorsognaGenerator(Particle):
 
         self.xpos[0] = np.random.uniform(0, 1, size=self.num_sum)
         self.ypos[0] = np.random.uniform(0, 1, size=self.num_sum)
-        # self.vx[0] = np.random.uniform(-1, 1, size=self.num_sum)
-        # self.vy[0] = np.random.uniform(-1, 1, size=self.num_sum)
         theta0 = np.random.uniform(-np.pi, np.pi, size=self.num_sum)
         self.vx[0] = np.cos(theta0)
         self.vy[0] = np.sin(theta0)
@@ -89,12 +85,6 @@ class DorsognaGenerator(Particle):
     def dorsogna(self):
 
         def dorsogna_model(t, init, alpha, beta, cA, lA, cR, lR):
-            # cA = self.cA_list[0]
-            # lA = self.lA_list[0]
-            # cR = self.cR_list[0]
-            # lR = self.lR_list[0]
-            # alpha = self.alpha_list[0]
-            # beta = self.beta_list[0]
 
             meps = np.finfo(np.float64).eps
 
@@ -129,7 +119,6 @@ class DorsognaGenerator(Particle):
         sol = ode(dorsogna_model).set_integrator('dopri5', atol=10 ** (-3))
         sol.set_initial_value(init, 0).set_f_params(alpha, beta, cA, lA, cR, lR)
 
-#         while sol.successful() and sol.t < self.tmax - 1:
         for k in range(1, self.time_step):
             res = sol.integrate(self.times[k])
             if not sol.successful():
@@ -139,55 +128,3 @@ class DorsognaGenerator(Particle):
             self.vx[k]   = res[2 * self.num_sum:3 * self.num_sum]
             self.vy[k]   = res[3 * self.num_sum:]
             print(f"Dorsogna simulation: {k} / {self.time_step-1}", end="\r")
-#             res = sol.integrate(sol.t + self.dt) 
-#             idx = int(sol.t / self.dt) # changed. initially `idx = int(sol.t)`
-#             self.xpos[idx] = res[0:self.num_sum]
-#             self.ypos[idx] = res[self.num_sum:2 * self.num_sum]
-#             self.vx[idx] = res[2 * self.num_sum:3 * self.num_sum]
-#             self.vy[idx] = res[3 * self.num_sum:]
-#             print(f"Dorsogna simulation: {idx + 1} / {int(self.tmax)}", end="\r")
-
-    # def pca(self, time_series, pca_n=2):
-
-    #     self.time_series = [int(i) for i in time_series]
-    #     self.pca_comp = [None] * len(self.time_series)
-
-    #     for i, t in enumerate(self.time_series):
-    #         data = [np.arctan2(self.vy[int(j)], self.vx[int(j)]) for j in range(t)]
-    #         # data = np.concatenate((np.sin(np.array(data).T), np.cos(np.array(data).T)), axis=1)
-    #         # data = StandardScaler().fit_transform(np.array(data).T)
-    #         data = np.array(data).T
-    #         self.pca_comp[i] = PCA(n_components=pca_n, random_state=31415).fit_transform(data)
-    #         print(f"pca: {t} / {self.time_series[-1]}", end="\r")
-
-    # def cluster(self, cluster_type="spectral", pca_n=2):
-
-    #     self.cluster_type = cluster_type
-    #     self.cluster_list = [None] * len(self.time_series)
-    #     self.accuracy_arry = [None] * len(self.time_series)
-
-    #     for i, t in enumerate(self.time_series):
-    #         components = self.pca_comp[i][:, 0:pca_n]
-    #         if cluster_type == "spectral":
-    #             cluster_label = SpectralClustering(self.type_num, affinity='nearest_neighbors',random_state=31415).fit(components).labels_
-    #             [self.cluster_list[i], self.accuracy_arry[i]] = accu_type_score(self.type_label, cluster_label)
-    #         else:
-    #             print("Invalid cluster type!")
-    #         print(f"cluster: {t} / {self.time_series[-1]}", end="\r")
-
-    # def remove_item(self, item="xpos"):
-    #     item_list = ["xpos", "ypos", "vx", "vy"]
-    #     if item not in item_list:
-    #         raise ValueError(f"Invalid item name. Only capable for item in {item_list}")
-    #     try:
-    #         if hasattr(self, str(f"{item}")):
-    #             if item == "xpos":
-    #                 del [self.xpos]
-    #             if item == "ypos":
-    #                 del [self.ypos]
-    #             if item == "vx":
-    #                 del [self.vx]
-    #             if item == "vy":
-    #                 del [self.vy]
-    #     except NameError:
-    #         pass

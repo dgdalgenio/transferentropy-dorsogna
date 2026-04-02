@@ -51,7 +51,8 @@ class BaseTE(ABC):
  
     def __init__(self, outdir: str = ""):
         self.outdir = outdir
- 
+        if outdir:
+            os.makedirs(outdir, exist_ok=True)
         # set by develop_model in subclasses
         self.pos: np.ndarray | None = None          # (T, N, 2)
         self.vel: np.ndarray | None = None          # (T, N, 2)
@@ -354,6 +355,7 @@ class DorsognaTE(BaseTE):
         show_velocity: bool = True,
         vel_scale: int = 10,
         dt: float = 1,
+        animate: bool = True
     ):
         self.C              = C
         self.l              = l
@@ -384,17 +386,18 @@ class DorsognaTE(BaseTE):
         self.dor_sim = dor_sim
  
         # Save animation
-        os.makedirs(self.outdir, exist_ok=True)
-        self.frames = utils.animate_positions(
-            dor_sim,
-            filename=f"{self.outdir}/sim_{self._model_label()}.gif",
-            title=f"{phenotype_name} ({C}, {l})",
-            fps=fps,
-            show_velocity=show_velocity,
-            vel_scale=vel_scale,
-            vel_subsample=1,
-            vel_alpha=0.5,
-        )
+        if animate:
+            os.makedirs(self.outdir, exist_ok=True)
+            self.frames = utils.animate_positions(
+                dor_sim,
+                filename=f"{self.outdir}/sim_{self._model_label()}.gif",
+                title=f"{phenotype_name} ({C}, {l})",
+                fps=fps,
+                show_velocity=show_velocity,
+                vel_scale=vel_scale,
+                vel_subsample=1,
+                vel_alpha=0.5,
+            )
  
         # Positions: (T, N, 2)
         pos = np.stack(
@@ -414,7 +417,7 @@ class DorsognaTE(BaseTE):
 # ──────────────────────────────────────────────────────────────────────────────
 # Random Walk subclass
 # ──────────────────────────────────────────────────────────────────────────────
-class RandomWalk(BaseTE):
+class RandomWalkTE(BaseTE):
     """
     Random walk model Transfer Entropy simulation.
  
@@ -453,7 +456,8 @@ class RandomWalk(BaseTE):
         show_velocity: bool = True,
         vel_scale: int = 10,
         dt: float = 1,
-        animate: bool = False
+        animate: bool = False,
+        trail_lines: bool = False
     ):
         self.particle_count  = particle_count
         self.sigma           = sigma
@@ -474,7 +478,6 @@ class RandomWalk(BaseTE):
         self.ranwalk_sim = ranwalk_sim
  
         if animate:
-            # Save animation
             os.makedirs(self.outdir, exist_ok=True)
             self.frames = utils.animate_positions(
                 ranwalk_sim,
@@ -485,6 +488,7 @@ class RandomWalk(BaseTE):
                 vel_scale=vel_scale,
                 vel_subsample=1,
                 vel_alpha=0.5,
+                trail_lines=False
             )
  
         # Positions: (T, N, 2)
@@ -505,7 +509,7 @@ class RandomWalk(BaseTE):
 # ──────────────────────────────────────────────────────────────────────────────
 # Correlated Random Walk subclass
 # ──────────────────────────────────────────────────────────────────────────────
-class CorrRandomWalk(BaseTE):
+class CorrRandomWalkTE(BaseTE):
     """
     Correlated Random Walk Transfer Entropy simulation.
 
@@ -549,7 +553,8 @@ class CorrRandomWalk(BaseTE):
         show_velocity: bool = True,
         vel_scale: int = 10,
         dt: float = 1,
-        animate: bool = False
+        animate: bool = False,
+        trail_lines = False
     ):
         self.particle_count  = particle_count
         self.kappa           = kappa
@@ -575,8 +580,12 @@ class CorrRandomWalk(BaseTE):
                 corr_ranwalk_sim,
                 filename=f"{self.outdir}/sim_{self._model_label()}.gif",
                 title=f"Corr Random Walk (kappa: {kappa}, seed: {seed})",
-                fps=fps, show_velocity=show_velocity,
-                vel_scale=vel_scale, vel_subsample=1, vel_alpha=0.5,
+                fps=fps, 
+                show_velocity=show_velocity,
+                vel_scale=vel_scale, 
+                vel_subsample=1, 
+                vel_alpha=0.5,
+                trail_lines=trail_lines
             )
 
          # Positions: (T, N, 2)
@@ -617,7 +626,7 @@ class DorsognaNoMorseTE(BaseTE):
     # ── Naming helpers ────────────────────────────────────────────────────────
  
     def _model_label(self) -> str:
-        return f"dorsognanomorse_kappa{self.kappa}_seed{self.seed}"
+        return f"dorsognanomorse_seed{self.seed}"
     
     def _proper_model_label(self) -> str:
         return rf"dorsogna (no morse)"
@@ -637,7 +646,8 @@ class DorsognaNoMorseTE(BaseTE):
         show_velocity: bool = True,
         vel_scale: int = 10,
         dt: float = 1,
-        animate: bool = False
+        animate: bool = False,
+        trail_lines: bool = False
     ):
         self.phenotype_name  = phenotype_name
         self.particle_count  = particle_count
@@ -670,8 +680,12 @@ class DorsognaNoMorseTE(BaseTE):
                 dor_sim,
                 filename=f"{self.outdir}/sim_{self._model_label()}.gif",
                 title="D'Orsogna Variant - No Morse",
-                fps=fps, show_velocity=show_velocity,
-                vel_scale=vel_scale, vel_subsample=1, vel_alpha=0.5,
+                fps=fps, 
+                show_velocity=show_velocity,
+                vel_scale=vel_scale, 
+                vel_subsample=1, 
+                vel_alpha=0.5,
+                trail_lines=trail_lines
             )
  
         # Positions: (T, N, 2)
@@ -710,7 +724,7 @@ class DorsognaNoisyTE(BaseTE):
     # ── Naming helpers ────────────────────────────────────────────────────────
  
     def _model_label(self) -> str:
-        return f"dorsognanoisy_kappa{self.kappa}_seed{self.seed}"
+        return f"dorsognanoisy_diff{self.diff_coef}_seed{self.seed}"
     
     def _proper_model_label(self) -> str:
         return rf"dorsogna (noisy)"
@@ -731,7 +745,8 @@ class DorsognaNoisyTE(BaseTE):
         show_velocity: bool = True,
         vel_scale: int = 10,
         dt: float = 1,
-        animate: bool = False
+        animate: bool = False,
+        trail_lines = False
     ):
         self.phenotype_name  = phenotype_name
         self.particle_count  = particle_count
@@ -768,8 +783,12 @@ class DorsognaNoisyTE(BaseTE):
                 dor_sim,
                 filename=f"{self.outdir}/sim_{self._model_label()}.gif",
                 title=f"D'Orsogna Noisy (diff={diff_coef})",
-                fps=fps, show_velocity=show_velocity,
-                vel_scale=vel_scale, vel_subsample=1, vel_alpha=0.5,
+                fps=fps, 
+                show_velocity=show_velocity,
+                vel_scale=vel_scale, 
+                vel_subsample=1, 
+                vel_alpha=0.5,
+                trail_lines=trail_lines
             )
  
         # Positions: (T, N, 2)

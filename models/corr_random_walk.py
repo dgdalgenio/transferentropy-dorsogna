@@ -1,5 +1,4 @@
 import numpy as np
-import pdb
 
 class CorrRandomWalkParticles:
     def __init__(self, n_particles, kappa, seed = None):
@@ -14,8 +13,8 @@ class CorrRandomWalkParticles:
     def initiate(self, tmax, dt=1):
         self.tmax = tmax
         self.dt = dt
-        self.time_step = int(round(self.tmax / self.dt)) + 1 # changed: int(self.tmax / self.dt)
-        self.times = np.linspace(0.0, self.tmax, self.time_step) # added
+        self.time_step = int(round(self.tmax / self.dt)) + 1
+        self.times = np.linspace(0.0, self.tmax, self.time_step)
         
         self.xpos = np.zeros((self.time_step, self.n_particles))
         self.ypos = np.zeros((self.time_step, self.n_particles))
@@ -37,7 +36,6 @@ class CorrRandomWalkParticles:
             self.turn_angle = np.random.vonmises(mu=0, kappa=self.kappa, size = self.n_particles)
             cos_turn_angle = np.cos(self.turn_angle)
             sin_turn_angle = np.sin(self.turn_angle)
-            # pdb.set_trace()
             
             # Move using old velocity
             self.xpos[t, :] = self.xpos[t - 1, :] + self.vx[t - 1, :]

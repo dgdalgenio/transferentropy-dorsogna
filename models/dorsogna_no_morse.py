@@ -3,12 +3,6 @@ import warnings
 warnings.filterwarnings("ignore")
 
 from scipy.integrate import ode
-from sklearn.decomposition import PCA
-from sklearn.preprocessing import StandardScaler
-from sklearn.cluster import SpectralClustering
-
-from utils import accu_type_score
-
 
 class NoMorseParticle:
     type_num = 0
@@ -30,8 +24,6 @@ class NoMorseParticle:
         NoMorseParticle.num_list = []
         NoMorseParticle.alpha_list = []
         NoMorseParticle.beta_list = []
-
-
 
 class DorsognaNoMorseGenerator(NoMorseParticle):
 
@@ -73,7 +65,6 @@ class DorsognaNoMorseGenerator(NoMorseParticle):
     def dorsogna_no_morse(self):
 
         def dorsogna_no_morse_model(t, init, alpha, beta):
-
 
             l = len(init) // 4
  

@@ -1,6 +1,5 @@
 import numpy as np
 
-
 class RandomWalkParticles:
     def __init__(self, n_particles, sigma=1.0, seed=None):
         self.n_particles = n_particles

@@ -3,71 +3,28 @@ Functions combinate, permute, makedir, normalize, accu_type_score imported from 
 """
 import os
 import numpy as np
-# import pandas as pd
-from itertools import permutations, combinations
+from itertools import permutations
 from sklearn.metrics import accuracy_score
 import matplotlib.pyplot as plt
-
-def combinate(cluster_label, num):
-    return [list(p) for p in combinations(set(np.int_(cluster_label)), num)]
-
-
-
 
 def permute(labels):
     # permute([1,2,3]) --> [[1, 2, 3], [1, 3, 2], [2, 1, 3], [2, 3, 1], [3, 1, 2], [3, 2, 1]]
     return [list(p) for p in permutations(set(np.int_(labels)))]
 
-
-
-
 def makedir(dirname):
     if not os.path.exists(dirname):
         os.makedirs(dirname)
 
-
-
-
 def normalize(data):
     return (data - np.min(data)) / (np.max(data) - np.min(data))
-
-
-
-
-def accu_type_score(set1, set2):
-    all_comb = permute(set2)
-    l_len = len(set1)
-    best_accu = 0
-
-
-    for comb in all_comb:  # throughout every possible combinations except comb[0]
-        type_switch = np.zeros(shape=[l_len, ])
-        for idx, val in enumerate(comb):  # change label from comb[0] to comb[i]
-            type_switch[np.where(set2 == all_comb[0][idx])] = val
-        accu = accuracy_score(set1, type_switch)
-        if accu > best_accu:
-            best_accu = accu
-            best_type = type_switch
-            if accu > 0.8:
-                break
-            else:
-                pass
-        else:
-            pass
-
-
-    return [best_type, best_accu]
-
 
 """
 Functions below are created solely for the project
 """
 
-
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation, FFMpegWriter, PillowWriter
 import numpy as np
-
 
 def save_simulation(generator, path="simulation.npz"):
     """
@@ -111,7 +68,8 @@ def load_simulation(path="single_1_sim.npz"):
 def animate_positions(generator, filename="simulation.mp4", title=None, fps=5,
                       xlim=None, ylim=None, show_velocity=False,
                       vel_scale=0.05, vel_subsample=1, vel_alpha=0.7,
-                      ccw_color="red",cw_color="blue", neutral_color="gray"):
+                      ccw_color="red",cw_color="blue", neutral_color="gray",
+                      trail_lines=False):
     """
     Animate and save particle positions, optionally with velocity arrows.
 
@@ -205,27 +163,23 @@ def animate_positions(generator, filename="simulation.mp4", title=None, fps=5,
         vx0 = vx_list[0][idx]
         vy0 = vy_list[0][idx]
 
-
         quiv = ax.quiver(x0[idx], y0[idx], vx0, vy0,
                          angles='xy', scale_units='xy',
                          scale=1/vel_scale, width=0.003,
                          alpha=vel_alpha)
 
-
     def format_title(frame):
         return f"{title} (t={frame})" if title else f"t = {frame}"
 
-
     title_text = ax.text(0.5, 1.02, format_title(0), ha="center", va="bottom", transform=ax.transAxes)
 
-    # Store line objects for each particle's trail
-    lines = []
-    trail_length = 50  # How many previous positions to show (None for full trail)
-    for i in range(num_particles):
-        line, = ax.plot([], [], '-', alpha=0.3, linewidth=1)
-        lines.append(line)
-
-    
+    if trail_lines:
+        # Store line objects for each particle's trail
+        lines = []
+        trail_length = 50  # How many previous positions to show (None for full trail)
+        for _ in range(num_particles):
+            line, = ax.plot([], [], '-', alpha=0.3, linewidth=1)
+            lines.append(line)
     
     def update(frame):
         x = xpos[frame]
@@ -235,18 +189,17 @@ def animate_positions(generator, filename="simulation.mp4", title=None, fps=5,
        
         scat.set_offsets(np.stack((x, y), axis=1))
         colors = rotation_color(x, y, vx, vy, ccw_color, cw_color, neutral_color)
-        # colors = plt.cm.tab10(np.arange(num_particles) % 10) 
         scat.set_color(colors)
         title_text.set_text(format_title(frame))
 
-                # Update trails
-        start_frame = max(0, frame - trail_length) if trail_length else 0
-        for i in range(num_particles):
-            trail_x = [xpos[t][i] for t in range(start_frame, frame + 1)]
-            trail_y = [ypos[t][i] for t in range(start_frame, frame + 1)]
-            lines[i].set_data(trail_x, trail_y)
-            # Optional: color the trail to match particle color
-            lines[i].set_color(colors[i])
+        if trail_lines:
+            # Update trails
+            start_frame = max(0, frame - trail_length) if trail_length else 0
+            for i in range(num_particles):
+                trail_x = [xpos[t][i] for t in range(start_frame, frame + 1)]
+                trail_y = [ypos[t][i] for t in range(start_frame, frame + 1)]
+                lines[i].set_data(trail_x, trail_y)
+                lines[i].set_color(colors[i])
             
         artists = [scat, title_text]
         if show_velocity:
@@ -258,13 +211,10 @@ def animate_positions(generator, filename="simulation.mp4", title=None, fps=5,
             quiv.set_alpha(vel_alpha)
             artists.append(quiv)
 
-
         return tuple(artists)
-
 
     anim = FuncAnimation(fig, update, frames=range(T),
                          interval=1000 / fps, blit=True)
-
 
     if filename.lower().endswith(".mp4"):
         writer = FFMpegWriter(fps=fps)
@@ -274,7 +224,6 @@ def animate_positions(generator, filename="simulation.mp4", title=None, fps=5,
         anim.save(filename, writer=writer)
     else:
         raise ValueError("Unsupported extension; use .mp4 or .gif")
-
 
     plt.close(fig)
     print(f"Saved simulation to {filename}")
@@ -300,11 +249,11 @@ def set_plot_style() -> None:
     })
 
 proper_phenotype_names = {
-    'singlemill': 'single mill',
-    'doublemill': 'double mill',
-    'doublering': 'double ring',
-    'collswarm': 'collective swarm',
-    'escapesymm': 'escape symmetric',
-    'escapeunsymm': 'escape unsymmetric',
-    'escapecoll': 'escape collective'
+    'singlemill': 'Single Mill',
+    'doublemill': 'Double Mill',
+    'doublering': 'Double Ring',
+    'collswarm': 'Collective Swarm',
+    'escapesymm': 'Escape Symmetric',
+    'escapeunsymm': 'Escape Unsymmetric',
+    'escapecoll': 'Escape Collective'
 }
