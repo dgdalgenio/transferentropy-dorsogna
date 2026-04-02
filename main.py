@@ -419,7 +419,7 @@ class DorsognaTE(BaseTE):
 # ──────────────────────────────────────────────────────────────────────────────
 class RandomWalkTE(BaseTE):
     """
-    Random walk model Transfer Entropy simulation.
+    Gaussian random walk model Transfer Entropy simulation.
  
     Usage
     -----
@@ -457,7 +457,7 @@ class RandomWalkTE(BaseTE):
         vel_scale: int = 10,
         dt: float = 1,
         animate: bool = False,
-        trail_lines: bool = False
+        trail_length: int = None
     ):
         self.particle_count  = particle_count
         self.sigma           = sigma
@@ -488,7 +488,7 @@ class RandomWalkTE(BaseTE):
                 vel_scale=vel_scale,
                 vel_subsample=1,
                 vel_alpha=0.5,
-                trail_lines=False
+                trail_length=trail_length
             )
  
         # Positions: (T, N, 2)
@@ -554,7 +554,7 @@ class CorrRandomWalkTE(BaseTE):
         vel_scale: int = 10,
         dt: float = 1,
         animate: bool = False,
-        trail_lines = False
+        trail_length: int = None
     ):
         self.particle_count  = particle_count
         self.kappa           = kappa
@@ -585,7 +585,7 @@ class CorrRandomWalkTE(BaseTE):
                 vel_scale=vel_scale, 
                 vel_subsample=1, 
                 vel_alpha=0.5,
-                trail_lines=trail_lines
+                trail_length=trail_length
             )
 
          # Positions: (T, N, 2)
@@ -647,7 +647,7 @@ class DorsognaNoMorseTE(BaseTE):
         vel_scale: int = 10,
         dt: float = 1,
         animate: bool = False,
-        trail_lines: bool = False
+        trail_length: int = None
     ):
         self.phenotype_name  = phenotype_name
         self.particle_count  = particle_count
@@ -685,7 +685,7 @@ class DorsognaNoMorseTE(BaseTE):
                 vel_scale=vel_scale, 
                 vel_subsample=1, 
                 vel_alpha=0.5,
-                trail_lines=trail_lines
+                trail_length=trail_length
             )
  
         # Positions: (T, N, 2)
@@ -746,7 +746,7 @@ class DorsognaNoisyTE(BaseTE):
         vel_scale: int = 10,
         dt: float = 1,
         animate: bool = False,
-        trail_lines = False
+        trail_length: int = None
     ):
         self.phenotype_name  = phenotype_name
         self.particle_count  = particle_count
@@ -788,7 +788,7 @@ class DorsognaNoisyTE(BaseTE):
                 vel_scale=vel_scale, 
                 vel_subsample=1, 
                 vel_alpha=0.5,
-                trail_lines=trail_lines
+                trail_length=trail_length
             )
  
         # Positions: (T, N, 2)

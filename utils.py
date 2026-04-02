@@ -1,27 +1,3 @@
-"""
-Functions combinate, permute, makedir, normalize, accu_type_score imported from https://github.com/tanpei0513/vicsek_trajectory
-"""
-import os
-import numpy as np
-from itertools import permutations
-from sklearn.metrics import accuracy_score
-import matplotlib.pyplot as plt
-
-def permute(labels):
-    # permute([1,2,3]) --> [[1, 2, 3], [1, 3, 2], [2, 1, 3], [2, 3, 1], [3, 1, 2], [3, 2, 1]]
-    return [list(p) for p in permutations(set(np.int_(labels)))]
-
-def makedir(dirname):
-    if not os.path.exists(dirname):
-        os.makedirs(dirname)
-
-def normalize(data):
-    return (data - np.min(data)) / (np.max(data) - np.min(data))
-
-"""
-Functions below are created solely for the project
-"""
-
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation, FFMpegWriter, PillowWriter
 import numpy as np
@@ -69,7 +45,7 @@ def animate_positions(generator, filename="simulation.mp4", title=None, fps=5,
                       xlim=None, ylim=None, show_velocity=False,
                       vel_scale=0.05, vel_subsample=1, vel_alpha=0.7,
                       ccw_color="red",cw_color="blue", neutral_color="gray",
-                      trail_lines=False):
+                      trail_length=False):
     """
     Animate and save particle positions, optionally with velocity arrows.
 
@@ -95,6 +71,8 @@ def animate_positions(generator, filename="simulation.mp4", title=None, fps=5,
         Show the velocity arrow of every Xth particle for every frame.
     vel_alpha : float in [0,1]
         Transparency of the velocity arrows (0 = invisible, 1 = opaque).
+    trail_length : int or None
+        Length of trail shown in animation. If None, no trail lines shown.
     """
     xpos = generator.xpos
     ypos = generator.ypos
@@ -153,7 +131,6 @@ def animate_positions(generator, filename="simulation.mp4", title=None, fps=5,
                           vmin=0, vmax=max(type_label)+1)
     else:
         scat = ax.scatter(x0, y0, s=20, c="black")
-    colors0 = rotation_color(x0, y0, vx0,vy0, ccw_color, cw_color, neutral_color)
    
     quiv = None
     if show_velocity:
@@ -173,10 +150,10 @@ def animate_positions(generator, filename="simulation.mp4", title=None, fps=5,
 
     title_text = ax.text(0.5, 1.02, format_title(0), ha="center", va="bottom", transform=ax.transAxes)
 
-    if trail_lines:
+    if trail_length:
         # Store line objects for each particle's trail
         lines = []
-        trail_length = 50  # How many previous positions to show (None for full trail)
+        trail_length = trail_length  # How many previous positions to show (None for full trail)
         for _ in range(num_particles):
             line, = ax.plot([], [], '-', alpha=0.3, linewidth=1)
             lines.append(line)
@@ -192,7 +169,7 @@ def animate_positions(generator, filename="simulation.mp4", title=None, fps=5,
         scat.set_color(colors)
         title_text.set_text(format_title(frame))
 
-        if trail_lines:
+        if trail_length:
             # Update trails
             start_frame = max(0, frame - trail_length) if trail_length else 0
             for i in range(num_particles):
