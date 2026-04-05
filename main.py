@@ -11,7 +11,6 @@ import calculateTE
 
 ## Import models ##
 import models.dorsogna as dorsogna
-import models.dorsogna_no_morse as dorsogna_no_morse
 import models.dorsogna_noisy as dorsogna_noisy
 import models.random_walk as random_walk
 import models.corr_random_walk as corr_random_walk
@@ -591,106 +590,6 @@ class CorrRandomWalkTE(BaseTE):
          # Positions: (T, N, 2)
         pos = np.stack(
             [np.array(corr_ranwalk_sim.xpos), np.array(corr_ranwalk_sim.ypos)], axis=2
-        )
-        self.pos = pos
-        self.vel = self._central_difference(pos, dt)
- 
-        # Load or create overall-TE log
-        csv_path = self._overall_csv_path()
-        self.overall_TE_df = (
-            pd.read_csv(csv_path, index_col=0)
-            if os.path.exists(csv_path)
-            else pd.DataFrame()
-        )
-
-# ──────────────────────────────────────────────────────────────────────────────
-# D'Orsogna No Morse subclass
-# ──────────────────────────────────────────────────────────────────────────────
-class DorsognaNoMorseTE(BaseTE):
-    """
-    D'Orsogna variant without a Morse potential (no attraction/repulsion term).
- 
-    Only the self-propulsion / friction terms (alpha, beta) are active,
-    so particles move under pure velocity dynamics.
- 
-    Usage
-    -----
-    sim = DorsognaNoMorseTE(...)
-    sim.develop_model(...)
-    sim.compute_modelTE(...)
-    """
- 
-    def __init__(self, outdir: str = ""):
-        super().__init__(outdir)
-
-    # ── Naming helpers ────────────────────────────────────────────────────────
- 
-    def _model_label(self) -> str:
-        return f"dorsognanomorse_seed{self.seed}"
-    
-    def _proper_model_label(self) -> str:
-        return rf"dorsogna (no morse)"
- 
-    def _overall_csv_path(self) -> str:
-        return f"{self.outdir}/TElogoverall_{self._model_label()}.csv"
- 
-    # ── Model initialisation ──────────────────────────────────────────────────
- 
-    def develop_model(
-        self,
-        phenotype_name: str,
-        particle_count: int,
-        t_max: float,
-        seed: int = 42,
-        fps: int = 2,
-        show_velocity: bool = True,
-        vel_scale: int = 10,
-        dt: float = 1,
-        animate: bool = False,
-        trail_length: int = None
-    ):
-        self.phenotype_name  = phenotype_name
-        self.particle_count  = particle_count
-        self.t_max           = t_max
-        self.seed            = seed
-        self.dt              = dt
-        self.total_timesteps = int(round(t_max / dt))
- 
-        np.random.seed(seed)
- 
-        # Fixed D'Orsogna constants (no Morse terms)
-        alpha, beta = 1.5, 0.5
- 
-        # Reset any lingering particle state
-        dorsogna_no_morse.NoMorseParticle(label="tmp", alpha=0, beta=0, numbers=0).reset()
- 
-        # Build and run simulation
-        dor_sim = dorsogna_no_morse.DorsognaNoMorseGenerator(
-            label=phenotype_name,
-            alpha=alpha,
-            beta=beta,
-            numbers=particle_count,
-        )
-        dor_sim.initiate(tmax=t_max, dt=dt)
-        self.dor_sim = dor_sim
-    
-        if animate:
-            os.makedirs(self.outdir, exist_ok=True)
-            self.frames = utils.animate_positions(
-                dor_sim,
-                filename=f"{self.outdir}/sim_{self._model_label()}.gif",
-                title="D'Orsogna Variant - No Morse",
-                fps=fps, 
-                show_velocity=show_velocity,
-                vel_scale=vel_scale, 
-                vel_subsample=1, 
-                vel_alpha=0.5,
-                trail_length=trail_length
-            )
- 
-        # Positions: (T, N, 2)
-        pos = np.stack(
-            [np.array(dor_sim.xpos), np.array(dor_sim.ypos)], axis=2
         )
         self.pos = pos
         self.vel = self._central_difference(pos, dt)
