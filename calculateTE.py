@@ -8,7 +8,7 @@ import os
 import sys
 
 ## Start JVM functionality ##
-jarLocation = 'jidt/infodynamics.jar'
+jarLocation = 'infodynamics.jar'
 if not os.path.isfile(jarLocation):
     sys.exit("infodynamics.jar not found (expected at " + os.path.abspath(jarLocation) + ")")
 
