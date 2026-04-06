@@ -41,7 +41,7 @@ def load_simulation(path="single_1_sim.npz"):
     return snap
 
 
-def animate_positions(generator, filename="simulation.mp4", title=None, fps=5,
+def animate_positions(generator, filename="simulation.mp4", title=None, fps=5, dt=1,
                       xlim=None, ylim=None, show_velocity=False,
                       vel_scale=0.05, vel_subsample=1, vel_alpha=0.7,
                       ccw_color="red",cw_color="blue", neutral_color="gray",
@@ -61,6 +61,9 @@ def animate_positions(generator, filename="simulation.mp4", title=None, fps=5,
     fps : int
         Frames per second of the output video.
         Slower fps is recommended for interpretability.
+    dt : int
+        dt value used in simulation.
+        Used for matching time shown in display.
     xlim, ylim : tuple or None
         Plot limits for x and y. If None, auto-computed from data with a border.
     show_velocity : bool
@@ -146,7 +149,7 @@ def animate_positions(generator, filename="simulation.mp4", title=None, fps=5,
                          alpha=vel_alpha)
 
     def format_title(frame):
-        return f"{title} (t={frame})" if title else f"t = {frame}"
+        return f"{title} (t={frame*dt:.1f})" if title else f"t = {frame*dt:.1f}"
 
     title_text = ax.text(0.5, 1.02, format_title(0), ha="center", va="bottom", transform=ax.transAxes)
 

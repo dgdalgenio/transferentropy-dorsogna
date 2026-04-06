@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from scipy.spatial import cKDTree
 import pandas as pd
 import utils
+from utils import proper_phenotype_names
 from tqdm import tqdm
 import os
 import calculateTE
@@ -390,8 +391,9 @@ class DorsognaTE(BaseTE):
             self.frames = utils.animate_positions(
                 dor_sim,
                 filename=f"{self.outdir}/sim_{self._model_label()}.gif",
-                title=f"{phenotype_name} ({C}, {l})",
+                title=f"{proper_phenotype_names[phenotype_name]} ({C}, {l})",
                 fps=fps,
+                dt=dt,
                 show_velocity=show_velocity,
                 vel_scale=vel_scale,
                 vel_subsample=1,
@@ -483,6 +485,7 @@ class RandomWalkTE(BaseTE):
                 filename=f"{self.outdir}/sim_{self._model_label()}.gif",
                 title=f"Random Walk (sigma: {sigma}, seed: {seed})",
                 fps=fps,
+                dt=dt,
                 show_velocity=show_velocity,
                 vel_scale=vel_scale,
                 vel_subsample=1,
@@ -580,6 +583,7 @@ class CorrRandomWalkTE(BaseTE):
                 filename=f"{self.outdir}/sim_{self._model_label()}.gif",
                 title=f"Corr Random Walk (kappa: {kappa}, seed: {seed})",
                 fps=fps, 
+                dt=dt,
                 show_velocity=show_velocity,
                 vel_scale=vel_scale, 
                 vel_subsample=1, 
@@ -683,6 +687,7 @@ class DorsognaNoisyTE(BaseTE):
                 filename=f"{self.outdir}/sim_{self._model_label()}.gif",
                 title=f"D'Orsogna Noisy (diff={diff_coef})",
                 fps=fps, 
+                dt=dt,
                 show_velocity=show_velocity,
                 vel_scale=vel_scale, 
                 vel_subsample=1, 
